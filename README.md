@@ -5,7 +5,7 @@
 <span style="color:rgb(255, 0, 0);">LIONS @ EPFL</span> and <span style="color:rgb(133 203 210);">Tübingen AI Center</span>
 
 
-In this repo, you will find all the models trained for our paper. 
+All of our models are available in Huggingface 🤗 at [https://huggingface.co/LEAF-CLIP](https://huggingface.co/LEAF-CLIP).
 
 ### Loading CLIPModels
 
