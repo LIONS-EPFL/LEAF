@@ -71,19 +71,19 @@ if __name__ == '__main__':
     MODEL_NAME_DICT = { # ["model_name", "pretrained_clean", "pretrained_robust"]
         "vit-l-14": ["ViT-L-14-quickgelu",
                      "openai",
-                     "/mnt/cschlarmann37/project_bimodal-robust-clip/openclip-checkpoints/"
+                     "/path/to/openclip-checkpoints/"
                      "CLIP-ViT-L-rho50-k1-constrained.pt"],
         "vit-h-14": ["ViT-H-14",
                      "laion2b_s32b_b79k",
-                     "/mnt/cschlarmann37/project_bimodal-robust-clip/openclip-checkpoints/"
+                     "/path/to/openclip-checkpoints/"
                      "OpenCLIP-ViT-H-rho50-k1-constrained-FARE2.pt"],
         "vit-g-14": ["ViT-g-14",
                      "laion2b_s12b_b42k",
-                     "/mnt/cschlarmann37/project_bimodal-robust-clip/openclip-checkpoints/"
+                     "/path/to/openclip-checkpoints/"
                      "OpenCLIP-ViT-g-rho50-k1-constrained-FARE2.pt"],
         "vit-bigG-14": ["ViT-bigG-14",
                         "laion2b_s39b_b160k",
-                        "/mnt/cschlarmann37/project_bimodal-robust-clip/openclip-checkpoints/"
+                        "/path/to/openclip-checkpoints/"
                         "OpenCLIP-ViT-bigG-rho50-k1-constrained.pt"]
     }
 
@@ -99,6 +99,11 @@ if __name__ == '__main__':
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
+
+    results_file = (f"results-{args.n_samples}smpls-{args.iter}iters-{args.model}"
+                    f"-{'robust' if args.robust else 'clean'}.json")
+    results_path = os.path.join("./results_inversions", results_file)
+    os.makedirs(os.path.dirname(results_path), exist_ok=True)
 
     print(f"running on {args.n_samples} samples")
     with open(our_captions_path, 'r') as f:
@@ -130,10 +135,6 @@ if __name__ == '__main__':
         "results": results
     }
     # save results
-    results_file = (f"results-{args.n_samples}smpls-{args.iter}iters-{args.model}"
-                    f"-{'robust' if args.robust else 'clean'}.json")
-    results_path = os.path.join("/mnt/cschlarmann37/project_bimodal-robust-clip/results_inversions", results_file)
-    os.makedirs(os.path.dirname(results_path), exist_ok=True)
     with open(results_path, 'w') as f:
         json.dump(results, f, indent=2)
 

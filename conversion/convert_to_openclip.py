@@ -175,8 +175,6 @@ def main(args):
 
 
 
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Convert HF Transformers CLIP checkpoint to OpenCLIP (OpenAI) format"
