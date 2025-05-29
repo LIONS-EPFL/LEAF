@@ -4,8 +4,25 @@
 
 <span style="color:rgb(255, 0, 0);">LIONS @ EPFL</span> and <span style="color:rgb(133 203 210);">Tübingen AI Center</span>
 
+![](assets/teaser.png)
+[[Paper]](TODO) [[HuggingFace]](https://huggingface.co/LEAF-CLIP) [[BibTeX]](#citation) 
 
+We propose _Levenshtein Efficient Adversarial Finetuning_ (LEAF) in order to obtain an adversarially robust text encoder for CLIP. Combining it with an existing robust image encoder, [FARE](https://github.com/chs20/RobustVLM), yields robustness in both input domains.
 All of our models are available in Huggingface 🤗 at [https://huggingface.co/LEAF-CLIP](https://huggingface.co/LEAF-CLIP).
+
+## Table of Contents
+- [Installation](#installation)
+- [Pretrained Models](#pretrained-models)
+- [Training](#training)
+- [Evaluation](#evaluation)
+- [Citation](#citation)
+
+## Installation
+To install the required packages, install Python 3.11 and run:
+```bash
+pip install -r requirements.txt
+export PYTHONPATH="$PYTHONPATH:./src"
+```
 
 ### Loading CLIPModels
 
@@ -64,8 +81,38 @@ last_hidden_state = outputs.last_hidden_state
 pooled_output = outputs.pooled_output # pooled (EOS token) states
 ```
 
-### Acknowledgements
+## Training
 
-Our codebase is based in the [OpenCLIP codebase](https://github.com/mlfoundations/open_clip), we appreciate the effort of the OpenCLIP team and the release of their code and model weights.
+### LEAF (robust rext encoder)
+
+### FARE (robust image encoder)
+We adopt the training code from [FARE](https://github.com/chs20/RobustVLM) and show the training commands in `scripts/`.
 
 
+## Evaluation
+
+### Text embedding inversion
+To run the text embedding inversions, convert the HuggingFace models to OpenCLIP via `conversion/convert_to_openclip.py`. Then supply checkpoint paths in `src/pez/run_coco.py`and run:
+```bash
+cd ./src/pez
+python run_coco.py --model vit-h-14 [--robust]
+```
+
+### ImageNet evaluation
+To evaluate the clean and robust performance on ImageNet, run:
+```bash
+python src/robust_vlm/eval/imagenet.py --model_name LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2 --norm linf --eps 2
+```
+
+
+## Acknowledgement
+This codebase gratefully forks from 
+- [OpenCLIP](https://github.com/mlfoundations/open_clip)
+- [RobustVLM](https://github.com/chs20/RobustVLM)
+- [hard-prompts-made-easy](https://github.com/YuxinWenRick/hard-prompts-made-easy)
+- [CLIP_benchmark](https://github.com/LAION-AI/CLIP_benchmark)
+
+## Citation
+If you find this project useful, please cite our paper:
+```bibtex
+```
