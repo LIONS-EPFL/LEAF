@@ -187,7 +187,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--openclip_model", type=str,
         default="hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K",
-        help="OpenCLIP architecture name (e.g. 'ViT-B-32')"
+        help="OpenCLIP architecture name (e.g. 'ViT-B-32'),"
+             "use 'ViT-L-14-quickgelu' when converting OpenAI CLIP checkpoints"
     )
     parser.add_argument(
         "--output", type=str,
@@ -196,10 +197,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    args.hf_checkpoint = ""
-    args.openclip_model = "ViT-L-14-quickgelu"
-    args.pretrained = None  # "openai"
-    args.output = f"" \
-                  f"{args.hf_checkpoint.split('/')[1]}.pt"
+    if "openai" in args.hf_checkpoint.lower():
+        assert "quickgelu" in args.openclip_model  # OpenAI CLIP uses quickgelu
 
     main(args)
