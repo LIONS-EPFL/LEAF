@@ -8,7 +8,7 @@
 [[Paper]](TODO) [[HuggingFace]](https://huggingface.co/LEAF-CLIP) [[BibTeX]](#citation) 
 
 We propose _Levenshtein Efficient Adversarial Finetuning_ (LEAF) in order to obtain an adversarially robust text encoder for CLIP. Combining it with an existing robust image encoder, [FARE](https://github.com/chs20/RobustVLM), yields robustness in both input domains.
-All of our models are available in Huggingface 🤗 at [https://huggingface.co/LEAF-CLIP](https://huggingface.co/LEAF-CLIP).
+All of our models are available on Huggingface 🤗 at [https://huggingface.co/LEAF-CLIP](https://huggingface.co/LEAF-CLIP).
 
 ## Table of Contents
 - [Installation](#installation)
@@ -24,6 +24,7 @@ pip install -r requirements.txt
 export PYTHONPATH="$PYTHONPATH:./src"
 ```
 
+## Pretrained Models
 ### Loading CLIPModels
 
 You can load our models as any other CLIP model, for example, loading `LEAF-CLIP/CLIP-ViT-L-rho50-k1-constrained-FARE2` can be done by following the "openai/clip-vit-large-patch14" example snippet:
