@@ -105,6 +105,12 @@ To evaluate the clean and robust performance on ImageNet, run:
 python src/robust_vlm/eval/imagenet.py --model_name LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2 --norm linf --eps 2
 ```
 
+### COCO-Retrieval evaluation
+To evaluate the clean and robust performance on COCO-retrieval (automatically downloads the LEAF robust models from HF), run:
+```bash
+python3 eval_retrieval.py --num-samples 1000 --model-name 'ViT-L-14' 
+```
+
 
 ## Acknowledgement
 This codebase gratefully forks from 
