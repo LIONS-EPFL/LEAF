@@ -20,7 +20,6 @@ from robustbench.model_zoo.enums import BenchmarkDataset
 from eval_utils import compute_accuracy_no_dataloader, load_clip_model
 #from ..train.utils import str2bool
 from open_clip import build_zero_shot_classifier, IMAGENET_CLASSNAMES, OPENAI_IMAGENET_TEMPLATES, CLIP
-#from ..train.log import setup_logger
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -322,7 +321,6 @@ if __name__ == '__main__':
 
     # Parse command-line arguments
     args = parser.parse_args()
-    #setup_logger(log_file=None)
 
     main(args)
 

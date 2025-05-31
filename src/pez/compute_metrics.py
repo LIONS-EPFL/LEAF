@@ -27,14 +27,10 @@ def compute_word_accuracy(reconstructions, references):
     return n_correct / n_total
 
 
-def compute_bleu_score(reconstructions, references):
-    pass
-
-
 
 if __name__ == '__main__':
     ref_captions_path = "coco_captions.txt"
-    reconstuctions_dir = "/mnt/cschlarmann37/project_bimodal-robust-clip/results_inversions"
+    reconstuctions_dir = "./results_inversions"
 
     with open(ref_captions_path, 'r') as f:
         refs = f.readlines()
@@ -67,6 +63,3 @@ if __name__ == '__main__':
 
         score = bleu.corpus_score(reconstructions, references=None)
         print(f"BLEU score: {score.score:.4f}")
-
-        # print latex row
-        print(f"{sim_avg:.2f} & {word_acc*100:.1f} & {token_acc*100:.1f} & {score.score:.1f}")
