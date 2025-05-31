@@ -88,7 +88,10 @@ pooled_output = outputs.pooled_output # pooled (EOS token) states
 
 Our models are trained on the first 80k samples from DataComp-small. For instructions on downloading the dataset, follow the [DataComp repository](https://github.com/mlfoundations/datacomp). In order to replicate our training runs, modify the corresponding file in the `scripts` folder to include the data location. For example, ViT-L can be finetuned from the FARE2 checkpoints as:
 
-`bash scripts/train_leaf_vitl.sh`
+```bash
+bash scripts/train_leaf_vitl.sh
+```
+If memory requirements are a bottleneck, the parameters `--accum-freq` and `--batch-size` can be adjusted so that they factorize the original batch size of 128. For example, setting `--accum-freq 4` and `--batch-size 32` will perform 4 gradient accumulation steps with a batch size of 32 samples in order to simulate a batch size of 128.
 
 ### FARE (robust image encoder)
 We adopt the training code from [FARE](https://github.com/chs20/RobustVLM) and show the training commands in `scripts/`.
@@ -96,23 +99,48 @@ We adopt the training code from [FARE](https://github.com/chs20/RobustVLM) and s
 
 ## Evaluation
 
+### TextFARE loss
+
+To measure the LEAF loss in the AG-News dataset, run:
+
+```bash
+python3 eval_textfare.py --model_name LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2
+```
+
+### Zero-shot text classification
+
+To evaluate the zero-shot adversarial accuracy in the AG-News dataset, run:
+
+```bash
+python3 eval_zero_shot_text.py --model_name LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2
+```
+Other datasets can be considered by changing the `--dataset parameter`.
+
+### Text-to-image generation
+
+To evaluate the text-to-image generation performance of StableDiffusion v1.5 in the MS-COCO dataset at Levenshtein distance $k=2$ with LEAF, change the `--coco_root` variable to the location of your MS-COCO dataset and run:
+
+```bash
+python3 eval_text_to_image.py --model_name stable-diffusion-v1-5/stable-diffusion-v1-5 --batch_size 10 --adv --constrain --k 2 --text_encoder_name LEAF-CLIP/CLIP-ViT-L-rho50-k1-constrained-FARE2 --coco_root path/to/coco/root
+```
+
 ### Text embedding inversion
 To run the text embedding inversions, convert the HuggingFace models to OpenCLIP via `conversion/convert_to_openclip.py`. Then supply checkpoint paths in `src/pez/run_coco.py`and run:
 ```bash
 cd ./src/pez
-python run_coco.py --model vit-h-14 [--robust]
+python3 run_coco.py --model vit-h-14 [--robust]
 ```
 
 ### ImageNet evaluation
 To evaluate the clean and robust performance on ImageNet, run:
 ```bash
-python src/robust_vlm/eval/imagenet.py --model_name LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2 --norm linf --eps 2
+python3 src/robust_vlm/eval/eval_imagenet.py --model_name LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2 --norm linf --eps 2
 ```
 
 ### COCO-Retrieval evaluation
 To evaluate the clean and robust performance on COCO-retrieval (automatically downloads the LEAF robust models from HF), run:
 ```bash
-python3 eval_retrieval.py --num-samples 1000 --model-name 'ViT-L-14' 
+PATH-TO-COCO path/to/coco python3 eval_retrieval.py --num-samples 1000 --model-name 'ViT-L-14' 
 ```
 
 

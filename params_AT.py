@@ -514,10 +514,10 @@ def parse_args(args):
     )
 
     parser.add_argument(
-        "--n_charmer",
+        "--rho",
         default=20,
         type=int,
-        help='number of positions for the charmer attack.'
+        help='number of random positions for the leaf attack.'
     )
 
     parser.add_argument(

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--model_name", 
         type=str, 
-        default=None
+        default="openai/clip-vit-large-patch14"
         )
     parser.add_argument(
         "--attack_name", 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--dataset",
         type=str,
-        default="sst2"
+        default="agnews"
         )
     parser.add_argument(
         "--k",
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         default=1
         )
     parser.add_argument(
-        "--n_charmer",
+        "--rho",
         type=int,
         default=20
         )
@@ -105,9 +105,9 @@ if __name__ == '__main__':
     # filename
     os.makedirs('results_textfare', exist_ok=True)
     if len(args.model_name.split('/')) == 2:
-        filename = 'results_textfare/' + args.model_name.split('/')[-1] + '_' + args.dataset + f'_' + args.attack_name + f'_k{args.k}_n_charmer_{args.n_charmer}' + ('_constrained' if args.constrain else '') + '.csv'
+        filename = 'results_textfare/' + args.model_name.split('/')[-1] + '_' + args.dataset + f'_' + args.attack_name + f'_k{args.k}_rho_{args.rho}' + ('_constrained' if args.constrain else '') + '.csv'
     else:
-        filename = 'results_textfare/' + args.model_name.split('/')[-2] + '_' + args.dataset + f'_' + args.attack_name + f'_k{args.k}_n_charmer_{args.n_charmer}' + ('_constrained' if args.constrain else '') + '.csv'
+        filename = 'results_textfare/' + args.model_name.split('/')[-2] + '_' + args.dataset + f'_' + args.attack_name + f'_k{args.k}_rho_{args.rho}' + ('_constrained' if args.constrain else '') + '.csv'
 
     results = {'sentence':[], 'adv_sentence':[], 'textfare_clean':[], 'textfare_adv':[]}
     acc, acc_adv, n = 0., 0., 0.
@@ -124,10 +124,10 @@ if __name__ == '__main__':
 
 
             if args.attack_name == 'leaf':
-                _, perturbed_sentence = attack_text_leaf(model,tokenizer,[sentence],original_features,device,objective='l2',n=args.n_charmer,k=args.k,V=V,debug=False, constrain=args.constrain)
+                _, perturbed_sentence = attack_text_leaf(model,tokenizer,[sentence],original_features,device,objective='l2',n=args.rho,k=args.k,V=V,debug=False, constrain=args.constrain)
                 perturbed_sentence = perturbed_sentence[0]
             elif args.attack_name == 'charmer':
-                perturbed_sentence, dist = attack_text_charmer_inference(model,tokenizer,sentence,original_features,device,objective='l2',n=args.n_charmer,k=args.k,V=V,debug=False,batch_size=args.batch_size, constrain=args.constrain)
+                perturbed_sentence, dist = attack_text_charmer_inference(model,tokenizer,sentence,original_features,device,objective='l2',n=args.rho,k=args.k,V=V,debug=False,batch_size=args.batch_size, constrain=args.constrain)
             elif args.attack_name == 'bruteforce':
                 perturbed_sentence, dist = attack_text_bruteforce(model,tokenizer,sentence,original_features,device,objective='l2',V=V,debug=False,batch_size=128*10, constrain=args.constrain)
 

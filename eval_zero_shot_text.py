@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--model_name", 
         type=str, 
-        default=None
+        default="openai/clip-vit-large-patch14"
         )
     parser.add_argument(
         "--label_encoder", 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--dataset",
         type=str,
-        default="sst2"
+        default="agnews"
         )
     parser.add_argument(
         "--k",
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         default=1
         )
     parser.add_argument(
-        "--n_charmer",
+        "--rho",
         type=int,
         default=20
         )
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     # load processor
-    if "ViT-L" in args.model_name:
+    if "ViT-L" in args.model_name or "vit-large" in args.model_name:
         processor_name = 'openai/clip-vit-large-patch14'
     elif "ViT-H" in args.model_name:
         processor_name = 'laion/CLIP-ViT-H-14-laion2B-s32B-b79K'
@@ -99,9 +99,9 @@ if __name__ == '__main__':
     # filename
     os.makedirs('results_zero_shot_text', exist_ok=True)
     if len(args.model_name.split('/')) == 2:
-        filename = 'results_zero_shot_text/' + args.model_name.split('/')[-1] + '_' + args.dataset + f'_k{args.k}_n_charmer_{args.n_charmer}' + ('_constrained' if args.constrain else '') + ('_text_only' if args.label_encoder == 'text' else '') + '.csv'
+        filename = 'results_zero_shot_text/' + args.model_name.split('/')[-1] + '_' + args.dataset + f'_k{args.k}_rho_{args.rho}' + ('_constrained' if args.constrain else '') + ('_text_only' if args.label_encoder == 'text' else '') + '.csv'
     else:
-        filename = 'results_zero_shot_text/' + args.model_name.split('/')[-2] + '_' + args.dataset + f'_k{args.k}_n_charmer_{args.n_charmer}' + ('_constrained' if args.constrain else '') + ('_text_only' if args.label_encoder == 'text' else '') + '.csv'
+        filename = 'results_zero_shot_text/' + args.model_name.split('/')[-2] + '_' + args.dataset + f'_k{args.k}_rho_{args.rho}' + ('_constrained' if args.constrain else '') + ('_text_only' if args.label_encoder == 'text' else '') + '.csv'
 
     results = {'sentence':[], 'original_label':[], 'predicted_label':[], 'adv_sentence':[], 'adv_label':[]}
     acc, acc_adv, n = 0., 0., 0.
@@ -110,7 +110,7 @@ if __name__ == '__main__':
             if i==args.n_test: break
             sentence, label = d['text'], d['label']
 
-            perturbed_sentence, dist = attack_text_charmer_classification(model,tokenizer,sentence,label_features,label,device,n=args.n_charmer,k=args.k,V=V,debug=False,batch_size=128*20)
+            perturbed_sentence, dist = attack_text_charmer_classification(model,tokenizer,sentence,label_features,label,device,n=args.rho,k=args.k,V=V,debug=False,batch_size=128*20)
 
             #tokens = tokenizer([template.format(sentence), template.format(perturbed_sentence)]).to(device)
             tokens = tokenizer([sentence, perturbed_sentence]).to(device)

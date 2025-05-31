@@ -19,7 +19,7 @@ python3 train_AT_text_only.py \
     --val-num-samples 1024 \
     --k_adv 1 \
     --k_adv_test 1 \
-    --n_charmer=50 \
+    --rho=50 \
     --n_charmer_test=20 \
     --n_val_imagenet 1000 \
     --seed 1 \

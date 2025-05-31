@@ -30,7 +30,7 @@ def load_clip_model(clip_model_name, pretrained):
         if pretrained not in (None, "none", "None"):
             checkpoint = torch.load(pretrained, map_location=torch.device("cpu"))
             model.visual.load_state_dict(checkpoint)
-    elif clip_model_name.startswith("RCLIP/") or 'aimagelab' in clip_model_name or "hf_model" in clip_model_name or clip_model_name.startswith("openai/") \
+    elif clip_model_name.startswith("LEAF-CLIP/") or 'aimagelab' in clip_model_name or "hf_model" in clip_model_name or clip_model_name.startswith("openai/") \
         or clip_model_name.startswith("laion/"):  # bimodal robust clip project
         from transformers import AutoModel
         from PIL.Image import BICUBIC

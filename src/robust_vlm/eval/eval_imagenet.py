@@ -109,6 +109,11 @@ def main(args):
         data_dir = args.imagenet_root
         n_samples = args.n_samples_imagenet
         resizer = None
+    # elif args.dataset == 'cifar10':
+    #     num_classes = 10
+    #     data_dir = args.cifar10_root
+    #     n_samples = args.n_samples_imagenet
+    #     resizer = None
     else:
         raise ValueError(f'Unknown dataset: {args.dataset}')
     eps = args.eps
@@ -137,7 +142,7 @@ def main(args):
     if args.devices != '':
         # set cuda visible devices
         os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
-    main_device = 0
+    main_device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     num_gpus = torch.cuda.device_count()
     print('GPUS:',num_gpus)
     if num_gpus > 1:
@@ -177,15 +182,16 @@ def main(args):
 
     if args.dataset != 'imagenet':
         assert False
-        # make sure we don't resize outside the model as this influences threat model
-        preprocessor_without_normalize = transforms.ToTensor()
+    # make sure we don't resize outside the model as this influences threat model
+    #preprocessor_without_normalize = transforms.ToTensor()
     logging.info(f'[resizer] {resizer}')
     logging.info(f'[preprocessor] {preprocessor_without_normalize}')
     logging.info(f'[normalizer] {normalize}')
 
     model.eval()
     model.to(main_device)
-    # model.encode_text = types.MethodType(encode_text_wrapper_CLIPModel, model)
+    if isinstance(model, CLIPModel):
+        model.encode_text = types.MethodType(encode_text_wrapper_CLIPModel, model)
     
     with torch.no_grad():
         embedding_text_labels_norm = build_zero_shot_classifier(
@@ -194,7 +200,7 @@ def main(args):
             classnames=IMAGENET_CLASSNAMES,
             templates=OPENAI_IMAGENET_TEMPLATES,
             num_classes_per_batch=50,
-            device=f'cuda:{main_device}',
+            device=main_device,
             use_tqdm=True
         )
 
@@ -220,7 +226,8 @@ def main(args):
     model.eval()
 
     device = torch.device(main_device)
-    torch.cuda.empty_cache()
+    if main_device != 'cpu':
+        torch.cuda.empty_cache()
 
     dataset_short = (
         'img' if args.dataset == 'imagenet' else

@@ -120,7 +120,7 @@ def main(args):
             #f"j_{args.workers}",
             #f"p_{args.precision}",
             f"k_{args.k_adv}",
-            f"n_charmer{args.n_charmer}",
+            f"rho{args.rho}",
         ])
 
     resume_latest = args.resume == 'latest'
@@ -480,7 +480,7 @@ def main(args):
     '''
     Create csv file to store results
     '''
-    out_folder = './results/' + args.custom_out_folder + 'text_only_k' + str(args.k_adv) + '_n_charmer' + str(args.n_charmer) + '_seed' + str(args.seed)
+    out_folder = './results/' + args.custom_out_folder + 'text_only_k' + str(args.k_adv) + '_rho' + str(args.rho) + '_seed' + str(args.seed)
     os.makedirs(out_folder,exist_ok=True)
 
     """

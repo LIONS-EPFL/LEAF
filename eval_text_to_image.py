@@ -24,6 +24,7 @@ class CocoSingleCaptionDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         image, captions = self.dataset[idx]  # Get image
+        #print(captions)
         if type(captions[0]) == str:
             return image, captions[0]
         else:
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name", 
         type=str, 
-        default=None
+        default="stable-diffusion-v1-5/stable-diffusion-v1-5"
         )
     parser.add_argument(
         "--adv",
@@ -74,7 +75,7 @@ if __name__ == "__main__":
         default=-1
         )
     parser.add_argument(
-        "--n_charmer", 
+        "--rho", 
         type=int, 
         default=20,
         help="number of candidate positions to consider with Charmer"
@@ -114,14 +115,14 @@ if __name__ == "__main__":
     if args.dataset == "coco":
 
         # Paths to COCO dataset
-        dataset_root = args.coco_root  # Change this to your COCO root directory
-        ann_file = f"{dataset_root}/annotations/instances_val2017.json"
+        dataset_root = args.coco_root
+        ann_file = f"{dataset_root}/annotations/captions_val2017.json"
         img_folder = f"{dataset_root}/images"
 
     elif args.dataset == "flickr30k":
 
         # Paths to flickr30 dataset
-        dataset_root = args.flickr30k_root  # Change this to your COCO root directory
+        dataset_root = args.flickr30k_root
         ann_file = f"{dataset_root}/clean_captions.txt"
         img_folder = f"{dataset_root}/images"
     
@@ -129,7 +130,7 @@ if __name__ == "__main__":
 
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
-    out_folder = os.path.join(output_dir, (f"Adv_k{args.k}_rho{args.n_charmer}_" if args.adv else "") +
+    out_folder = os.path.join(output_dir, (f"Adv_k{args.k}_rho{args.rho}_" if args.adv else "") +
                                    (args.adv_objective + "_" if args.adv_objective!="dissim" else "") + 
                                    (f"constrained_" if args.constrain else "") + 
                                    args.model_name.split("/")[-1] + f"_{args.num_steps}steps" + 
@@ -164,7 +165,7 @@ if __name__ == "__main__":
     # print("Captions:", [cap["caption"] for cap in captions])
 
     # Initialize pipeline
-    pipeline = AutoPipelineForText2Image.from_pretrained(args.model_name, torch_dtype=torch.float16)
+    pipeline = AutoPipelineForText2Image.from_pretrained(args.model_name, torch_dtype=(torch.float16 if torch.cuda.is_available() else torch.float32))
     pipeline = pipeline.to(device)
 
     # Replace text encoder if specified
@@ -207,7 +208,7 @@ if __name__ == "__main__":
 
                     if args.model_name == "stabilityai/stable-diffusion-xl-base-1.0":
                         text_features_frozen_2 = pipeline.text_encoder_2(tokens).text_embeds
-                        adv_text, _ = attack_text_charmer_inference(pipeline.text_encoder,tokenizer,captions[j],text_features_frozen,device,objective=args.adv_objective,n=args.n_charmer,k=args.k,constrain=args.constrain,debug=True,model_2=pipeline.text_encoder_2, model_2_anchor_features=text_features_frozen_2, batch_size=256) 
+                        adv_text, _ = attack_text_charmer_inference(pipeline.text_encoder,tokenizer,captions[j],text_features_frozen,device,objective=args.adv_objective,n=args.rho,k=args.k,constrain=args.constrain,debug=True,model_2=pipeline.text_encoder_2, model_2_anchor_features=text_features_frozen_2, batch_size=256) 
                         tokens_adv = tokenizer(adv_text).unsqueeze(0).to(device)
                         text_features_adv = pipeline.text_encoder(tokens_adv).pooler_output
                         text_features_adv_2 = pipeline.text_encoder_2(tokens_adv).text_embeds
@@ -215,7 +216,7 @@ if __name__ == "__main__":
                         corr += text_features_frozen_2@text_features_adv_2.T/(torch.norm(text_features_adv_2) * torch.norm(text_features_frozen_2))
                         corr /= 2
                     else:   
-                        adv_text, _ = attack_text_charmer_inference(pipeline.text_encoder,tokenizer,captions[j],text_features_frozen,device,objective=args.adv_objective,n=args.n_charmer,k=args.k,constrain=args.constrain,debug=True, batch_size=512)        
+                        adv_text, _ = attack_text_charmer_inference(pipeline.text_encoder,tokenizer,captions[j],text_features_frozen,device,objective=args.adv_objective,n=args.rho,k=args.k,constrain=args.constrain,debug=True, batch_size=512)        
                         tokens_adv = tokenizer(adv_text).unsqueeze(0).to(device)
                         text_features_adv = pipeline.text_encoder(tokens_adv).pooler_output
                         corr = text_features_frozen@text_features_adv.T/(torch.norm(text_features_adv) * torch.norm(text_features_frozen))

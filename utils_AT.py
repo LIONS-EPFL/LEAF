@@ -298,13 +298,13 @@ def train_one_epoch_text_only(model, model_frozen, tokenizer, V, data, loss, epo
                 start_time = time.time()
                 adv_texts = []
                 for j,t in enumerate(texts):
-                    adv_text,_ = attack_text_charmer_inference(model,tokenizer,t,text_features_frozen[j],device,objective='l2',n=args.n_charmer,k=args.k_adv,constrain=args.constrain,V=V,debug=False)
+                    adv_text,_ = attack_text_charmer_inference(model,tokenizer,t,text_features_frozen[j],device,objective='l2',n=args.rho,k=args.k_adv,constrain=args.constrain,V=V,debug=False)
                     adv_texts.append(adv_text)
                 end_time = time.time()
                 times.append(end_time - start_time)
             else:
                 start_time = time.time()
-                _, adv_texts = attack_text(model,tokenizer,texts,text_features_frozen,device,objective='l2',n=args.n_charmer,k=args.k_adv,V=V,constrain=args.constrain,debug=False)        
+                _, adv_texts = attack_text(model,tokenizer,texts,text_features_frozen,device,objective='l2',n=args.rho,k=args.k_adv,V=V,constrain=args.constrain,debug=False)        
                 end_time = time.time()
                 times.append(end_time - start_time)
 
