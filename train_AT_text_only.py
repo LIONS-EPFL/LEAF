@@ -15,7 +15,6 @@ import sys
 import random
 
 from copy import deepcopy
-from functools import partial
 from datetime import datetime
 from torchvision import transforms
 
@@ -51,8 +50,8 @@ from open_clip_train.distributed import is_master, init_distributed_device, broa
 from open_clip_train.logger import setup_logging
 from params_AT import parse_args
 from open_clip_train.scheduler import cosine_lr, const_lr, const_lr_cooldown
-from utils_AT import train_one_epoch, train_one_epoch_text_only, evaluate
-from open_clip_train.file_utils import pt_load, check_exists, start_sync_process, remote_sync
+from utils_AT import train_one_epoch_text_only, evaluate
+from open_clip_train.file_utils import pt_load, start_sync_process, remote_sync
 
 
 LATEST_CHECKPOINT_NAME = "epoch_latest.pt"

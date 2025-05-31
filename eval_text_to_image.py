@@ -2,42 +2,16 @@ import os
 import types
 import torch
 import argparse
-import numpy as np
 import pandas as pd
 import torchvision.transforms as transforms
 
 from tqdm import tqdm
-from collections import defaultdict
-from torch.utils.data import Subset
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection, Flickr30k
 from diffusers import AutoPipelineForText2Image
-from utils_attacks import attack_text_charmer_inference, convert_clip_text_model
+from utils_attacks import attack_text_charmer_inference, convert_clip_text_model, encode_text_wrapper, encode_text_wrapper_2, tokenizer_wrapper
 from torchmetrics.multimodal.clip_score import CLIPScore
-from transformers import CLIPModel, CLIPTextModel, CLIPTextConfig
-from torchvision.transforms.functional import to_pil_image
-
-
-'''
-Wrappers
-'''
-def encode_text_wrapper(self, x, normalize = False):
-    out = self(x).pooler_output
-    if normalize:
-        out = out / torch.norm(out,dim=-1,keepdim=True)
-    return out
-
-def encode_text_wrapper_2(self, x, normalize = False):
-    out = self(x).text_embeds
-    if normalize:
-        out = out / torch.norm(out,dim=-1,keepdim=True)
-    return out
-
-class tokenizer_wrapper():
-    def __init__(self, tokenizer):
-        self.tokenizer = tokenizer
-    def __call__(self, x):
-        return torch.tensor(self.tokenizer(x,padding=True,truncation=True).input_ids)
+from transformers import CLIPTextModel
 
 
 # Create a dataset with one caption per image
@@ -111,7 +85,6 @@ if __name__ == "__main__":
         default=1,
         help="maximum edit distance"
         )
-    #parser.add_argument("--num_images", type=int, default=5000)
     parser.add_argument(
         "--batch_size", 
         type=int, 

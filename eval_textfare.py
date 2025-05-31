@@ -7,7 +7,7 @@ import argparse
 import pandas as pd
 from data_AT import get_text_classification_dataset
 from transformers import AutoProcessor, CLIPModel, CLIPTextModel, CLIPTextConfig
-from utils_attacks import encode_text_wrapper, encode_text_wrapper_CLIPModel, tokenizer_wrapper, attack_text_charmer_inference, attack_text_charmer, attack_text_bruteforce
+from utils_attacks import encode_text_wrapper, encode_text_wrapper_CLIPModel, tokenizer_wrapper, attack_text_charmer_inference, attack_text_leaf, attack_text_bruteforce
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
 
             if args.attack_name == 'leaf':
-                _, perturbed_sentence = attack_text_charmer(model,tokenizer,[sentence],original_features,device,objective='l2',n=args.n_charmer,k=args.k,V=V,debug=False, constrain=args.constrain)
+                _, perturbed_sentence = attack_text_leaf(model,tokenizer,[sentence],original_features,device,objective='l2',n=args.n_charmer,k=args.k,V=V,debug=False, constrain=args.constrain)
                 perturbed_sentence = perturbed_sentence[0]
             elif args.attack_name == 'charmer':
                 perturbed_sentence, dist = attack_text_charmer_inference(model,tokenizer,sentence,original_features,device,objective='l2',n=args.n_charmer,k=args.k,V=V,debug=False,batch_size=args.batch_size, constrain=args.constrain)

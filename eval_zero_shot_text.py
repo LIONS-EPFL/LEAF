@@ -7,7 +7,7 @@ import argparse
 import pandas as pd
 from data_AT import get_text_classification_dataset
 from transformers import AutoProcessor, CLIPModel, CLIPTextModel, CLIPTextConfig
-from utils_attacks import encode_text_wrapper, encode_text_wrapper_CLIPModel, tokenizer_wrapper, attack_text_charmer_classification
+from utils_attacks import encode_text_wrapper_CLIPModel, tokenizer_wrapper, attack_text_charmer_classification
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -107,7 +107,6 @@ if __name__ == '__main__':
     acc, acc_adv, n = 0., 0., 0.
     with torch.no_grad():
         for i,d in enumerate(tqdm(dataset)):
-            # we evaluate on 100 examples only
             if i==args.n_test: break
             sentence, label = d['text'], d['label']
 

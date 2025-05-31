@@ -86,6 +86,10 @@ pooled_output = outputs.pooled_output # pooled (EOS token) states
 
 ### LEAF (robust rext encoder)
 
+Our models are trained on the first 80k samples from DataComp-small. For instructions on downloading the dataset, follow the [DataComp repository](https://github.com/mlfoundations/datacomp). In order to replicate our training runs, modify the corresponding file in the `scripts` folder to include the data location. For example, ViT-L can be finetuned from the FARE2 checkpoints as:
+
+`bash scripts/train_leaf_vitl.sh`
+
 ### FARE (robust image encoder)
 We adopt the training code from [FARE](https://github.com/chs20/RobustVLM) and show the training commands in `scripts/`.
 
