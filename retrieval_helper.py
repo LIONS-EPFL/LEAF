@@ -9,6 +9,9 @@ from torch.utils.data import Dataset
 from torchvision.datasets.utils import download_url
 from tqdm import tqdm
 import torch.nn.functional as F
+import types
+
+from utils_attacks import encode_text_wrapper_CLIPModel
 
 
 import torch
@@ -41,10 +44,11 @@ class CLIPWrapper:
         self.model = model
         self.device = device
         self.tokenizer = tokenizer
-    
-    def encode_text(self, inp, normalize=False):
+        
 
-        text_feats = self.model.get_text_features(**inp)
+    def encode_text(self, inp, normalize=False):
+        encc = types.MethodType(encode_text_wrapper_CLIPModel, self.model)
+        text_feats = encc(inp)
 
         if normalize:
                 text_feats = F.normalize(text_feats, dim=-1)
@@ -61,7 +65,7 @@ class CLIPWrapper:
             # text_input = clip.tokenize(text).to(self.device)
             # print(text)
             text_input = self.tokenizer(text).to(self.device)
-            text_feats = self.model.get_text_features(**text_input)
+            text_feats = self.model.get_text_features(text_input)
             if normalize:
                 text_feats = F.normalize(text_feats, dim=-1)
             text_embeds.append(text_feats)
