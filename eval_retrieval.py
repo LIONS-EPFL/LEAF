@@ -3,6 +3,7 @@ import os
 import pathlib
 import time
 from pathlib import Path
+import types
 
 import open_clip
 import pandas as pd
@@ -13,7 +14,7 @@ from tqdm import tqdm
 from transformers import AutoProcessor, CLIPModel
 
 from retrieval_helper import *
-from utils_attack import attack_text_charmer_constrained_ret
+from utils_attacks import encode_text_wrapper, encode_text_wrapper_CLIPModel, tokenizer_wrapper, attack_text_charmer_inference, attack_text_charmer, attack_text_bruteforce
 
 COCO2017_DIR = pathlib.Path("PATH-TO-COCO")
 
@@ -57,7 +58,7 @@ def zero_shot_retrival(model, model_name, preprocess_val, tokenizer, k=1 ,n=10, 
 
     target_cap = retrievalTargets[target]
     anchor_feat = tokenizer([target_cap]).to(device)
-    anchor_features = model.model.get_text_features(**anchor_feat)
+    anchor_features = model.model.get_text_features(anchor_feat)
     print("Running attack with target: ", target_cap)
     
     ## Output file that stores the original sentences and perturbed ones
@@ -77,7 +78,7 @@ def zero_shot_retrival(model, model_name, preprocess_val, tokenizer, k=1 ,n=10, 
         for i, sent in enumerate(tqdm(clean_sentences)):
             
             start = time.time()
-            perturbed_sentence, dist = attack_text_charmer_constrained_ret(model, tokenizer, sent, anchor_features, device, objective=obj, n=n,k=k, debug=False)
+            perturbed_sentence, dist = attack_text_charmer_inference(model, tokenizer, sent, anchor_features, device, objective=obj, n=n,k=k, debug=False)
             pert.append(perturbed_sentence)
             clean_sents.append(sent)
             dists.append(dist)
@@ -96,7 +97,7 @@ def zero_shot_retrival(model, model_name, preprocess_val, tokenizer, k=1 ,n=10, 
     outs = {'clean': result_records, 'adv': result_records_adv}
 
     json.dump(outs, open(os.path.join(out_folder, out_file_r), 'w'), indent=4)
-    print("Model: {} \n Target: {} results: {}".format(pretraining_name, model_name, target, outs))
+    print("Model: {} \n Target: {} results: {}".format(model_name, target, outs))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -126,10 +127,19 @@ if __name__ == "__main__":
     model = CLIPModel.from_pretrained(modelDict[args.model_name][1])
 
     processor_name = modelDict[args.model_name][0]     
+
     clip_processor = AutoProcessor.from_pretrained(processor_name)
-    tokenizer = lambda x: clip_processor(text=x, padding=True, return_tensors='pt')
+
     preprocess = lambda x: clip_processor(images=x, return_tensors="pt")
-        
+    
+        # load model
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.eval()
+    
+    # wrap it
+    tokenizer = tokenizer_wrapper(clip_processor.tokenizer)
+
+
     model.eval()
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
