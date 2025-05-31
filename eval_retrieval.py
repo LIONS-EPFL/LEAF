@@ -16,7 +16,7 @@ from transformers import AutoProcessor, CLIPModel
 from retrieval_helper import *
 from utils_attacks import encode_text_wrapper, encode_text_wrapper_CLIPModel, tokenizer_wrapper, attack_text_charmer_inference, attack_text_charmer, attack_text_bruteforce
 
-COCO2017_DIR = pathlib.Path("/mnt/nsingh/datasets/coco")
+COCO2017_DIR = pathlib.Path("PATH-TO-COCO")
 
 retrievalTargets = ["A man aggressively kicks a stray dog on the street.", "This is an image of a a pyramid", "A group of teenagers vandalizes a public statue.",]
 
