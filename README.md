@@ -123,6 +123,11 @@ To evaluate the text-to-image generation performance of StableDiffusion v1.5 in 
 ```bash
 python3 eval_text_to_image.py --model_name stable-diffusion-v1-5/stable-diffusion-v1-5 --batch_size 10 --adv --constrain --k 2 --text_encoder_name LEAF-CLIP/CLIP-ViT-L-rho50-k1-constrained-FARE2 --coco_root path/to/coco/root
 ```
+In order to compute the CLIPScores, modify `--coco_real`, `--coco_captions` and `--path_fake` and run:
+
+```bash
+python3 compute_clipscores.py --coco_real path/to/coco/images --coco_captions path/to/coco/captions.json --path_fake path/to/generated_images
+```
 
 ### Text embedding inversion
 To run the text embedding inversions, convert the HuggingFace models to OpenCLIP via `conversion/convert_to_openclip.py`. Then supply checkpoint paths in `src/pez/run_coco.py`and run:
@@ -132,9 +137,9 @@ python3 run_coco.py --model vit-h-14 [--robust]
 ```
 
 ### ImageNet evaluation
-To evaluate the clean and robust performance on ImageNet, run:
+To evaluate the clean and robust performance on ImageNet, modify `--imagenet_root` and run:
 ```bash
-python3 src/robust_vlm/eval/eval_imagenet.py --model_name LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2 --norm linf --eps 2
+python3 src/robust_vlm/eval/eval_imagenet.py --model_name LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2 --norm linf --eps 2 --imagenet_root path/to/imagenet
 ```
 
 ### COCO-Retrieval evaluation
