@@ -11,11 +11,12 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import words
 from collections import OrderedDict
 from copy import deepcopy
+
+
 '''
 Wrappers
 ------------------------------------------------------------------------------------------------------------------
 '''
-
 
 def convert_clip_text_model(model_with_projection, model_without_projection):
     # Assume:
@@ -47,6 +48,12 @@ def convert_clip_text_model(model_with_projection, model_without_projection):
 
 def encode_text_wrapper(self, x, normalize = False):
     out = self(x).pooler_output
+    if normalize:
+        out = out / torch.norm(out,dim=-1,keepdim=True)
+    return out
+
+def encode_text_wrapper_2(self, x, normalize = False):
+    out = self(x).text_embeds
     if normalize:
         out = out / torch.norm(out,dim=-1,keepdim=True)
     return out
@@ -287,95 +294,7 @@ def generate_all_sentences(S,V,subset_z = None,k=1, alternative = None):
     #    print(len(out), len(set(out)))
     return out
 
-def attack_text_iterative(model,tokenizer,sentences,anchor_features,device,objective="l2",n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation],debug=False):
-    '''
-    Attack the text
-
-    model: clip model
-    tokenizer: text tokenizer
-    sentences: batch of clean sentences
-    image_features: batch of encoded images with model
-    n: number of random perturbations to sample for each sentence
-    k: maximum Levenshtein distance to consider in the perturbations
-    '''
-    if objective == "dissim":
-        '''
-        just in case
-        '''
-        anchor_features /= anchor_features.norm(dim=-1, keepdim=True)
-
-    for _ in range(k):
-        SS = []
-        for S in sentences:
-            SS+= generate_random_sentences(S,V,n,k=1)
-        tokens = tokenizer(SS).to(device)
-
-        #print(tokens)
-        if objective == 'l2':
-
-            text_features = model.encode_text(tokens,normalize=False).view(len(sentences),n,-1)
-
-            loss = ((text_features - anchor_features.view(len(sentences),1,-1))**2).sum(dim=-1)
-
-            
-
-        elif objective == 'dissim':
-            text_features = model.encode_text(tokens,normalize=True).view(len(sentences),n,-1)
-
-            loss = -(text_features @ anchor_features.transpose(-1,-2)).squeeze(-1)
-
-        ids_best = torch.argmax(loss,dim=-1)
-
-        sentences = []
-        for row,id in enumerate(ids_best):
-            sentences.append(SS[row*n + id])
-        
-    return torch.take_along_dim(text_features, ids_best.view(-1,1,1).repeat(1,1,text_features.shape[-1]),dim=1).squeeze(1), sentences
-
-def attack_text_simple(model,tokenizer,sentences,anchor_features,device,objective="l2",n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation],debug=False):
-    '''
-    Attack the text
-
-    model: clip model
-    tokenizer: text tokenizer
-    sentences: batch of clean sentences
-    image_features: batch of encoded images with model
-    n: number of random perturbations to sample for each sentence
-    k: maximum Levenshtein distance to consider in the perturbations
-    '''
-
-    if objective == "dissim":
-        '''
-        just in case
-        '''
-        anchor_features /= anchor_features.norm(dim=-1, keepdim=True)
-
-    SS = []
-    for S in sentences:
-        SS+= generate_random_sentences(S,V,n,k=k)
-    tokens = tokenizer(SS).to(device)
-
-    #print(tokens)
-    if objective == 'l2':
-
-        text_features = model.encode_text(tokens,normalize=False).view(len(sentences),n,-1)
-
-        loss = ((text_features - anchor_features.view(len(sentences),1,-1))**2).sum(dim=-1)
-
-    elif objective == 'dissim':
-        text_features = model.encode_text(tokens,normalize=True).view(len(sentences),n,-1)
-
-        loss = -(text_features @ anchor_features.transpose(-1,-2)).squeeze(-1)
-
-    ids_best = torch.argmax(loss,dim=-1)
-
-    sentences = []
-    for row,id in enumerate(ids_best):
-        sentences.append(SS[row*n + id])
-
-    return torch.take_along_dim(text_features, ids_best.view(-1,1,1).repeat(1,1,text_features.shape[-1]),dim=1).squeeze(1), sentences
-
-def attack_text_charmer(model,tokenizer,sentences,anchor_features,device,objective="l2",n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation], constrain = False,debug=False):
+def attack_text_leaf(model,tokenizer,sentences,anchor_features,device,objective="l2",n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation], constrain = False,debug=False):
     '''
     n in this case is the number of random positions and random chars to replace.
 
@@ -660,51 +579,6 @@ def attack_text_charmer_inference(model,tokenizer,sentence,anchor_features,devic
 
         return sentence,dist+1
 
-def attack_text_random_search(model,tokenizer,sentence,anchor_features,device,objective="l2",n=10,k_step = 1,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation], constrain = False,debug=False):
-    '''
-    random search
-    '''
-    if objective in ["dissim","sim"]:
-        '''
-        just in case
-        '''
-        anchor_features /= anchor_features.norm(dim=-1, keepdim=True)
-    
-    original = sentence
-
-    with torch.no_grad():
-        dist = 0
-        for dist in range(k):
-            #avoid inserts
-            SS = generate_random_sentences(sentence,V,n,k=k_step,alternative=None,insert=False)
-            # if debug:
-            #     print(max([len(s) for s in SS]))
-            tokens = tokenizer(SS).to(device)
-            text_features = model.encode_text(tokens,normalize=(objective in ["sim", "dissim"])).view(len(SS),-1)
-
-            if objective == 'l2':
-
-                loss = ((text_features - anchor_features)**2).sum(dim=-1)
-
-            elif objective == 'negl2':
-
-                loss = -((text_features - anchor_features)**2).sum(dim=-1)
-
-            elif objective == 'dissim':
-
-                loss = -(text_features @ anchor_features.transpose(-1,-2)).squeeze(-1)
-
-            elif objective == 'sim':
-
-                loss = -(text_features @ anchor_features.transpose(-1,-2)).squeeze(-1)
-
-            sentence = SS[torch.argmax(loss).item()]
-
-            if debug:
-                print(sentence, torch.max(loss))
-
-        return sentence,dist+1
-
 def attack_text_charmer_classification(model,tokenizer,sentence,image_features,label,device,n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation],debug=False, batch_size=128*20):
     '''
     n in this case is the number of positions in charmer
@@ -770,9 +644,7 @@ def attack_text_charmer_classification(model,tokenizer,sentence,image_features,l
 
 
 def attack_text(model,tokenizer,sentences,image_features,device,objective="l2",n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation],constrain = False,debug=False):
-    #return attack_text_simple(model,tokenizer,sentences,image_features,device,n,k,V,debug)
-    #return attack_text_iterative(model,tokenizer,sentences,image_features,device,n,k,V,debug)
-    return attack_text_charmer(model,tokenizer,sentences,image_features,device,objective,n,k,V,constrain,debug)
+    return attack_text_leaf(model,tokenizer,sentences,image_features,device,objective,n,k,V,constrain,debug)
 
 
 '''
@@ -857,133 +729,94 @@ def attack_image_classification(model,normalize,images,text_features,labels,devi
             print('loss:',logits.softmax(-1).sum().item())
     return (images + delta).detach()
 
-
-def attack_text_charmer_t2i_pipeline(pipeline,clip,clip_processor,sentence,device,batch_size=20,n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation],debug=False):
+def attack_text_charmer_constrained_ret(model,tokenizer,sentence,anchor_features,device,objective="l2",n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation], constrain=False, debug=False, batch_size=50):
     '''
-    attacking the text to minimize the clip_score between the generated image and the original caption.
+    Attack for text-to-image targeted retrieval
     '''
-    text_inputs = clip_processor(text=[sentence], return_tensors="pt", padding=True).to(device)
-    text_emb = clip.get_text_features(**text_inputs)
-    text_emb/=torch.norm(text_emb,p=2,dim=-1,keepdim=True)
+    if objective in ["dissim"]:
+        if anchor_features:
+            anchor_features /= anchor_features.norm(dim=-1, keepdim=True)
+    
+    original = sentence
+    orignal_features = model.encode_text(tokenizer(sentence).to(device),normalize=False)
 
     with torch.no_grad():
         dist = 0
         for dist in range(k):
-            #Select best positions
+              #Select best positions
             VV = [ord(' ')]
             SS = generate_all_sentences(sentence,VV,alternative=-1)
+            if constrain:
+                valid = valid_sentence_batched(sentence,SS,debug=False)
+                valid = [item for sublist in valid for item in sublist]
+                SS = [s if v else sentence for s,v in zip(SS,valid) ]
+    
 
-            loss = []
+            tokens = tokenizer(SS).to(device)
 
-            print(len(SS), len(SS))
 
-            for i in range(len(SS)//batch_size):
-                beginning = i*batch_size
-                end = min((i+1)*batch_size,len(SS)-1)
-                if debug:
-                    print(beginning, end)
-                out = pipeline(SS[beginning:end], num_inference_steps = 50).images
+            if objective == 'l2':
 
-                images = clip_processor(images=out, return_tensors="pt").to(device)
-                image_emb = clip.get_image_features(**images)
+                text_features = model.encode_text(tokens,normalize=True).view(len(SS),-1)
 
-                image_emb/=torch.norm(image_emb,p=2,dim=-1,keepdim=True)
+                if anchor_features is not None:
+                    loss = ((text_features - anchor_features)**2).sum(dim=-1)
+                else:
+                    # pass
+                    loss = -((text_features - orignal_features)**2).sum(dim=-1)
 
-                loss.append(-image_emb@text_emb.T)
-                if debug:
-                    print(beginning, end,i,len(SS)//batch_size + 1,loss[-1])
-
-            loss = torch.cat(loss,dim=0).squeeze()
+            elif objective == 'dissim':
+                text_features = model.encode_text(tokens,normalize=True).view(len(SS),-1)
+                
+                if anchor_features is not None:
+                    loss = -(text_features @ anchor_features.transpose(-1,-2)).squeeze(-1)
+                else: 
+                    # pass
+                    loss = (text_features @ orignal_features.transpose(-1,-2)).squeeze(-1)
 
             top_positions = torch.topk(loss,min(n,loss.shape[0]),dim=0).indices
             
-            loss = []
+            del text_features, tokens, loss
             
             #Generate all possible sentences with the top positions
             SS = generate_all_sentences(sentence,V,subset_z=top_positions,alternative=-1)
-            for i in range(len(SS)//batch_size):
-                beginning = i*batch_size
-                end = min((i+1)*batch_size,len(SS)-1)
-                if debug:
-                    print(beginning, end)
-                out = pipeline(SS[beginning:end], num_inference_steps = 50).images
+            if constrain:
+                valid = valid_sentence_batched(sentence,SS,debug=False)
+                valid = [item for sublist in valid for item in sublist]
+                SS = [s if v else sentence for s,v in zip(SS,valid)]
+                if len(SS) == 0:
+                    SS = [sentence] 
+           
+            tokens = tokenizer(SS).to(device)
 
-                images = clip_processor(images=out, return_tensors="pt").to(device)
-                image_emb = clip.get_image_features(**images)
 
-                image_emb/=torch.norm(image_emb,p=2,dim=-1,keepdim=True)
+            if objective == 'l2':
 
-                loss.append(-image_emb@text_emb.T)
-                if debug:
-                    print(i,len(SS)//batch_size + 1,loss[-1])
+                text_features = model.encode_text(tokens,normalize=False).view(len(SS),-1)
 
-            loss = torch.cat(loss,dim=0).squeeze()
+                if anchor_features is not None:
+                    loss = ((text_features - anchor_features)**2).sum(dim=-1)
+                else:
+                    # pass
+                    loss = -((text_features - orignal_features)**2).sum(dim=-1)
 
-            sentence = SS[torch.argmax(loss).item()]
+            elif objective == 'dissim':
+                text_features = model.encode_text(tokens,normalize=True).view(len(SS),-1)
+                
+                if anchor_features is not None:
+                    loss = -(text_features @ anchor_features.transpose(-1,-2)).squeeze(-1)
+                else: 
+                    # pass
+                    loss = (text_features @ orignal_features.transpose(-1,-2)).squeeze(-1)
 
-        return sentence,dist+1
-
-def attack_text_charmer_t2i_pipeline_fast(pipeline,clip,clip_processor,sentence,device,batch_size=20,n=10,k=1, V=[-1] + [ord(c) for c in string.ascii_lowercase + ' ' + string.ascii_uppercase + string.digits + string.punctuation],debug=False):
-    '''
-    attacking the text to minimize the clip_score between the generated image and the original caption.
-    '''
-    text_inputs = clip_processor(text=[sentence], return_tensors="pt", padding=True).to(device)
-    text_emb = clip.get_text_features(**text_inputs)
-    text_emb/=torch.norm(text_emb,p=2,dim=-1,keepdim=True)
-
-    with torch.no_grad():
-        dist = 0
-        for dist in range(k):
-            #Select best positions
-            VV = [ord(' ')]
-            positions = np.random.choice(range(2*len(sentence)+1),size=n,replace = n>2*len(sentence)+1 )
-            SS = generate_all_sentences(sentence,VV,subset_z=positions,alternative=-1)
-            
-            loss=[]
-            for i in range(len(SS)//batch_size):
-                beginning = i*batch_size
-                end = min((i+1)*batch_size,len(SS)-1)
-                if debug:
-                    print(beginning, end)
-                out = pipeline(SS[beginning:end], num_inference_steps = 50).images
-
-                images = clip_processor(images=out, return_tensors="pt").to(device)
-                image_emb = clip.get_image_features(**images)
-
-                image_emb/=torch.norm(image_emb,p=2,dim=-1,keepdim=True)
-
-                loss.append(-image_emb@text_emb.T)
-                if debug:
-                    print(beginning, end,i,len(SS)//batch_size + 1,loss[-1])
-
-            loss = torch.cat(loss,dim=0).squeeze()
-
-            best_pos = torch.argmax(loss).item()
-            
-            SS= generate_random_sentences_at_z(sentence, best_pos, V,n, alternative = -1)
-            
-            loss = []
-            for i in range(len(SS)//batch_size):
-                beginning = i*batch_size
-                end = min((i+1)*batch_size,len(SS)-1)
-                if debug:
-                    print(beginning, end)
-                out = pipeline(SS[beginning:end], num_inference_steps = 50).images
-
-                images = clip_processor(images=out, return_tensors="pt").to(device)
-                image_emb = clip.get_image_features(**images)
-
-                image_emb/=torch.norm(image_emb,p=2,dim=-1,keepdim=True)
-
-                loss.append(-image_emb@text_emb.T)
-                if debug:
-                    print(i,len(SS)//batch_size + 1,loss[-1])
-
-            loss = torch.cat(loss,dim=0).squeeze()
+            # top_positions = torch.topk(loss,min(n,loss.shape[0]),dim=0).indices
 
             sentence = SS[torch.argmax(loss).item()]
 
-        return sentence,dist+1
+            if debug:
+                print(sentence, torch.max(loss))
+
+        return sentence, dist+1
 
 if __name__ == '__main__':
     pass
