@@ -143,9 +143,9 @@ python3 src/robust_vlm/eval/eval_imagenet.py --model_name LEAF-CLIP/OpenCLIP-ViT
 ```
 
 ### COCO-Retrieval evaluation
-To evaluate the clean and robust performance on COCO-retrieval (automatically downloads the LEAF robust models from HF), run:
+To evaluate the clean and robust performance on COCO-retrieval (automatically downloads the LEAF robust models from HF), we use 1000 samples from the `karpathy_test2017` set.
 ```bash
-PATH-TO-COCO path/to/coco python3 eval_retrieval.py --num-samples 1000 --model-name 'ViT-L-14' 
+python eval_retrieval.py --num-samples 1000 --model-name 'ViT-L-14' --coco_root path/to/coco/val2017
 ```
 
 
