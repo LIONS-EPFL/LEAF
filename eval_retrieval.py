@@ -16,7 +16,6 @@ from transformers import AutoProcessor, CLIPModel
 from retrieval_helper import *
 from utils_attacks import encode_text_wrapper, encode_text_wrapper_CLIPModel, tokenizer_wrapper, attack_text_charmer_inference, attack_text_leaf, attack_text_bruteforce
 
-COCO2017_DIR = pathlib.Path("PATH-TO-COCO")
 
 retrievalTargets = ["A man aggressively kicks a stray dog on the street.", "This is an image of a a pyramid", "A group of teenagers vandalizes a public statue.",]
 
@@ -34,19 +33,17 @@ class tokenizer_wrapper():
     def __call__(self, x):
         return torch.tensor(self.tokenizer(x,padding=True,truncation=True).input_ids)
 
-def zero_shot_retrival(model, model_name, preprocess_val, tokenizer, k=1 ,n=10, num_samples=1000, obj='l2', target=None,  device='cuda'):
+def zero_shot_retrival(model, model_name, preprocess_val, tokenizer, k=1 ,n=10, num_samples=1000, obj='l2', target=None,  device='cuda', coco_root=None):
 
     model = CLIPWrapper(model, device, tokenizer, preprocess_val)
 
     out_folder = './retrieval_evals'
     os.makedirs(out_folder,exist_ok=True)
-
-    data_dir = Path(COCO2017_DIR)
     
     max_words = 50  
     split = "test"
     
-    dataset = COCO_Retrieval(root_dir=data_dir, split=split, image_preprocess=preprocess_val, image_perturb_fn=None,
+    dataset = COCO_Retrieval(root_dir=Path(coco_root), split=split, image_preprocess=preprocess_val, image_perturb_fn=None,
                              max_words=max_words, download=False, num_samples=num_samples)
     collate_fn = _default_collate if preprocess_val is None else None
     loader = DataLoader(dataset, batch_size=25, shuffle=False, num_workers=8, collate_fn=collate_fn)
@@ -116,6 +113,9 @@ if __name__ == "__main__":
         "--obj", default='dissim', type=str, help="l2/dissim"
     )
     parser.add_argument(
+        "--coco_root", default=None, type=str, help="Path to coco-vla2017 images"
+    )
+    parser.add_argument(
         "--model-name", default='ViT-L-14', type=str, choices=["ViT-L-14", "ViT-H-14", "ViT-bigG-14"]
     )
     parser.add_argument(
@@ -146,5 +146,5 @@ if __name__ == "__main__":
 
     model = model.to(device)
 
-    zero_shot_retrival(model, args.model_name, preprocess, tokenizer, args.k, args.n, args.num_samples, args.obj, args.target, device)
+    zero_shot_retrival(model, args.model_name, preprocess, tokenizer, args.k, args.n, args.num_samples, args.obj, args.target, device, args.coco_root)
     
