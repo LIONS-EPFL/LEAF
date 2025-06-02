@@ -50,7 +50,7 @@ parser.add_argument('--template', type=str, default='ensemble', help='Text templ
 parser.add_argument('--norm', type=str, default='linf', help='Norm for attacks; linf, l2')
 parser.add_argument('--eps', type=float, default=2., help='Epsilon for attack')
 # parser.add_argument('--alpha', type=float, default=2., help='APGD alpha parameter')
-parser.add_argument('--experiment_name', type=str, default='/mnt/cschlarmann37/project_bimodal-robust-clip/clip-adversarial-images/', help='Experiment name for logging')
+parser.add_argument('--experiment_name', type=str, default='./results-imagenet', help='Experiment name for logging')
 parser.add_argument('--blackbox_only', type=str2bool, default=False, help='Run blackbox attacks only')
 parser.add_argument('--save_images', type=str2bool, default=True, help='Save images during benchmarking')
 parser.add_argument('--wandb', type=str2bool, default=False, help='Use Weights & Biases for logging')

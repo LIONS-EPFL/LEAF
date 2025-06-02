@@ -30,7 +30,3 @@ def setup_logger(log_file):
     console_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(module)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     console_handler.setFormatter(console_formatter)
     root.addHandler(console_handler)
-
-if __name__ == '__main__':
-    setup_logger("/mnt/cschlarmann37/log-test.log")
-    logging.info("Hello")

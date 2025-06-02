@@ -30,8 +30,7 @@ args.__dict__.update(read_json(config_path))
 
 # You may modify the hyperparamters here
 args.print_new_best = True
-# args.clip_pretrain = ("/mnt/cschlarmann37/project_fuse-clip/openclip-checkpoints/"
-#                       "OpenCLIP-ViT-H-rho50-k1-constrained-FARE2.pt")
+
 if args.prompt_len == "match":
     print("Warning: using default tokenizer")
     ids = open_clip_pez.tokenize(text).squeeze()

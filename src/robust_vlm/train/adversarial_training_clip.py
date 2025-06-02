@@ -634,14 +634,7 @@ if __name__ == '__main__':
         # set cuda visible devices
         os.environ['CUDA_VISIBLE_DEVICES'] = args.devices
 
-    if os.path.exists('/mnt/cschlarmann37'):
-        base_dir = '/mnt/cschlarmann37/project_bimodal-robust-clip'
-    elif os.path.exists('/weka/hein/cschlarmann37'):
-        base_dir = '/weka/hein/cschlarmann37/project_bimodal-robust-clip'
-    elif os.path.exists('/mnt/lustre/work/hein/cschlarmann37'):
-        base_dir = '/mnt/lustre/work/hein/cschlarmann37/project_bimodal-robust-clip'
-    else:
-        raise ValueError("No base directory found!")
+    base_dir = "./"
 
     # Keep the same model name / directory if continuing
     if args.start_step == 0:
