@@ -67,9 +67,6 @@ parser.add_argument('--save_checkpoints', type=str2bool, default=False, help='Sa
 parser.add_argument('--skip-first-val', type=str2bool, default=False, help='Skip first validation')
 parser.add_argument('--devices', type=str, default='', help='Device IDs for CUDA')
 
-FT_TO_BASE_MODEL = {
-    "RCLIP/OpenCLIP-ViT-H-rho50-k1": "hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K",
-}
 
 def main(args):
     # either resume or start a fresh wandb run
@@ -118,6 +115,7 @@ def main(args):
     else:
         # ...
         assert args.pretrained in ['', 'none']
+        raise NotImplementedError
         model_orig = AutoModel.from_pretrained(args.model_name)
         model = AutoModel.from_pretrained(args.model_name)
         image_processor, tokenizer = get_preprocessor(args.model_name)
@@ -307,15 +305,6 @@ class ComputeLossWrapper:
             loss *= -1
         return loss
 
-def get_preprocessor(model_name):
-    if model_name in FT_TO_BASE_MODEL:
-        base_model_name = FT_TO_BASE_MODEL[model_name]
-        model, _, preprocessor = open_clip.create_model_and_transforms(base_model_name)
-        tokenizer = open_clip.get_tokenizer(base_model_name)
-        del model  # not needed just for preprocessor
-    else:
-        raise ValueError(f'Unknown model name: {model_name}')
-    return preprocessor, tokenizer
 
 def train_one_epoch(
     step_total, model, model_orig, dataloader, optimizer, scheduler, normalize,
