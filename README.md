@@ -94,7 +94,8 @@ bash scripts/train_leaf_vitl.sh
 If memory requirements are a bottleneck, the parameters `--accum-freq` and `--batch-size` can be adjusted so that they factorize the original batch size of 128. For example, setting `--accum-freq 4` and `--batch-size 32` will perform 4 gradient accumulation steps with a batch size of 32 samples in order to simulate a batch size of 128.
 
 ### FARE (robust image encoder)
-We adopt the training code from [FARE](https://github.com/chs20/RobustVLM) and show the training commands in `scripts/`.
+We adopt the training code from [FARE](https://github.com/chs20/RobustVLM) and show the training commands in `scripts/`. 
+We train the models in OpenCLIP format and convert them afterwards to HuggingFace format via `conversion/convert_2.py`.
 
 
 ## Evaluation
@@ -133,6 +134,7 @@ python3 compute_clipscores.py --coco_real path/to/coco/images --coco_captions pa
 To run the text embedding inversions, convert the HuggingFace models to OpenCLIP via `conversion/convert_to_openclip.py`. Then supply checkpoint paths in `src/pez/run_coco.py`and run:
 ```bash
 cd ./src/pez
+pip install -r requirements.txt  # install additional requirements
 python3 run_coco.py --model vit-h-14 [--robust]
 ```
 
