@@ -1,0 +1,1 @@
+Forked from https://github.com/YuxinWenRick/hard-prompts-made-easy

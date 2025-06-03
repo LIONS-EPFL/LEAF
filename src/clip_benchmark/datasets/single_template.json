@@ -1,0 +1,101 @@
+{
+    "cifar10": [
+        "This is a photo of a {c}"
+    ],
+    "cifar100": [
+        "This is a photo of a {c}"
+    ],
+    "imagenet1k": [
+        "This is a photo of a {c}"
+    ],
+    "food101": [
+        "This is a photo of a {c}"
+    ],
+    "sun397": [
+        "This is a photo of a {c}"
+    ],
+    "cars": [
+        "This is a photo of a {c}"
+    ],
+    "fgvc_aircraft": [
+        "This is a photo of a {c}"
+    ],
+    "dtd": [
+        "This is a photo of a {c}"
+    ],
+    "pets": [
+        "This is a photo of a {c}"
+    ],
+    "caltech101": [
+        "This is a photo of a {c}"
+    ],
+    "flowers": [
+        "This is a photo of a {c}"
+    ],
+    "mnist": [
+        "This is a photo of a {c}"
+    ],
+    "stl10": [
+        "This is a photo of a {c}"
+    ],
+    "eurosat": [
+        "This is a photo of a {c}"
+    ],
+    "gtsrb": [
+        "This is a photo of a {c}"
+    ],
+    "country211": [
+        "This is a photo of a {c}"
+    ],
+    "renderedsst2": [
+        "This is a photo of a {c}"
+    ],
+    "voc2007": [
+        "This is a photo of a {c}"
+    ],
+    "voc2007_multilabel": [
+        "This is a photo of a {c}"
+    ],
+    "fer2013": [
+        "This is a photo of a {c}"
+    ],
+    "clevr_count_all": [
+        "This is a photo of a {c}"
+    ],
+    "clevr_closest_object_distance": [
+        "This is a photo of a {c}"
+    ],
+    "pcam": [
+        "This is a photo of a {c}"
+    ],
+    "svhn": [
+        "This is a photo of a {c}"
+    ],
+    "resisc45": [
+        "This is a photo of a {c}"
+    ],
+    "kitti_closest_vehicle_distance": [
+        "This is a photo of a {c}"
+    ],
+    "smallnorb_label_azimuth": [
+        "This is a photo of a {c}"
+    ],
+    "smallnorb_label_elevation": [
+        "This is a photo of a {c}"
+    ],
+    "dsprites_label_x_position": [
+        "This is a photo of a {c}"
+    ],
+    "dsprites_label_orientation": [
+        "This is a photo of a {c}"
+    ],
+    "dmlab": [
+        "This is a photo of a {c}"
+    ],
+    "diabetic_retinopathy": [
+        "This is a photo of a {c}"
+    ],
+    "dummy": [
+        "This is a photo of a {c}"
+    ]
+}

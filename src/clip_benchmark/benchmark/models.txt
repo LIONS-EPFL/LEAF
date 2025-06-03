@@ -1,0 +1,7 @@
+hf-hub:chs20/FARE4-ViT-B-32-laion2B-s34B-b79K,none
+LEAF-CLIP/OpenCLIP-ViT-H-rho50-k1-constrained-FARE2,none
+LEAF-CLIP/OpenCLIP-ViT-g-rho50-k1-constrained-FARE2,none
+laion/CLIP-ViT-g-14-laion2B-s12B-b42K,none
+laion/CLIP-ViT-H-14-laion2B-s32B-b79K,none
+openai/clip-vit-large-patch14,none
+LEAF-CLIP/CLIP-ViT-L-rho50-k1-constrained-FARE2,none

@@ -1,0 +1,1 @@
+Forked from https://github.com/LAION-AI/CLIP_benchmark
