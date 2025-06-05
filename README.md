@@ -5,7 +5,7 @@
 <span style="color:rgb(255, 0, 0);">LIONS @ EPFL</span> and <span style="color:rgb(133 203 210);">Tübingen AI Center</span>
 
 ![](assets/teaser.png)
-[[Paper]](TODO) [[HuggingFace]](https://huggingface.co/LEAF-CLIP) [[BibTeX]](#citation) 
+[[Paper]](https://www.arxiv.org/abs/2506.03355) [[HuggingFace]](https://huggingface.co/LEAF-CLIP) [[BibTeX]](#citation) 
 
 We propose _Levenshtein Efficient Adversarial Finetuning_ (LEAF) in order to obtain an adversarially robust text encoder for CLIP. Combining it with an existing robust image encoder, [FARE](https://github.com/chs20/RobustVLM), yields robustness in both input domains.
 All of our models are available on Huggingface 🤗 at [https://huggingface.co/LEAF-CLIP](https://huggingface.co/LEAF-CLIP).
