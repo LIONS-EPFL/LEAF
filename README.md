@@ -161,4 +161,10 @@ This codebase gratefully forks from
 ## Citation
 If you find this project useful, please cite our paper:
 ```bibtex
+@article{rocamora2025robustness,
+	title = {Robustness in Both Domains: CLIP Needs a Robust Text Encoder},
+	author = {Elias Abad Rocamora and Christian Schlarmann and Naman Deep Singh and Yongtao Wu and Matthias Hein and Volkan Cevher},
+	journal = {arXiv preprint arXiv:2506.03355},
+	year = 2025
+}
 ```
