@@ -4,6 +4,8 @@
 
 <span style="color:rgb(255, 0, 0);">LIONS @ EPFL</span> and <span style="color:rgb(133 203 210);">Tübingen AI Center</span>
 
+_NeurIPS 2025_
+
 ![](assets/teaser.png)
 [[Paper]](https://www.arxiv.org/abs/2506.03355) [[HuggingFace]](https://huggingface.co/LEAF-CLIP) [[BibTeX]](#citation) 
 
@@ -161,10 +163,10 @@ This codebase gratefully forks from
 ## Citation
 If you find this project useful, please cite our paper:
 ```bibtex
-@article{rocamora2025robustness,
+@inproceedings{rocamora2025robustness,
 	title = {Robustness in Both Domains: CLIP Needs a Robust Text Encoder},
 	author = {Elias Abad Rocamora and Christian Schlarmann and Naman Deep Singh and Yongtao Wu and Matthias Hein and Volkan Cevher},
-	journal = {arXiv preprint arXiv:2506.03355},
+	booktitle = {{NeurIPS}},
 	year = 2025
 }
 ```
